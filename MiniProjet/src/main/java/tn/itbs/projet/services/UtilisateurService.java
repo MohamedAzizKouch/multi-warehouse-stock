@@ -34,9 +34,11 @@ public class UtilisateurService {
     }
 
     public Utilisateur trouverParEmail(String email) {
-        return utilisateurRepo.findByEmail(email).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !")
-        );
+        Utilisateur u = utilisateurRepo.findByEmail(email);
+        if (u == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !");
+        }
+        return u;
     }
 
     public List<Utilisateur> trouverParRole(Role role) {

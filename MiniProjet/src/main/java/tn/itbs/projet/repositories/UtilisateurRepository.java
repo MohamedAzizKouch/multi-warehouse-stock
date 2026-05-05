@@ -11,7 +11,7 @@ import tn.itbs.projet.entities.Utilisateur.Role;
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Integer> {
 
     // Recherche par email (utilise pour l'authentification Spring Security)
-    Optional<Utilisateur> findByEmail(String email);
+    Utilisateur findByEmail(String email);
 
     // User par role
     List<Utilisateur> findByRole(Role role);
