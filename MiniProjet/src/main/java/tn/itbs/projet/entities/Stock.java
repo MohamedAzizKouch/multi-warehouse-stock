@@ -13,7 +13,7 @@ public class Stock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idStock;
+    private Integer idStock;
 
     private int quantite;
     private int seuilAlerte;

@@ -16,7 +16,7 @@ public class Entrepot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idEntrepot;
+    private Integer idEntrepot;
 
     private String nom;
     private String adresse;

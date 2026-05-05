@@ -13,7 +13,7 @@ public class Utilisateur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idUtilisateur;
+    private Integer idUtilisateur;
 
     private String nom;
     private String email;

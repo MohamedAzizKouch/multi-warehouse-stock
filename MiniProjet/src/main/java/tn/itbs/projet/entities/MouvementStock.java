@@ -15,7 +15,7 @@ public class MouvementStock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idMouvement;
+    private Integer idMouvement;
 
     @Enumerated(EnumType.STRING)
     private TypeMouvement type;   // ENTREE ou SORTIE
