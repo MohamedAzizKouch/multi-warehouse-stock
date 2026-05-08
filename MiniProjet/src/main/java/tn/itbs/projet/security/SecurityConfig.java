@@ -28,6 +28,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .userDetailsService(utilisateurDetailsService)
             .authorizeHttpRequests(auth -> auth
+            		// ✅ Swagger accessible sans auth
+            	    .requestMatchers(
+            	        "/swagger-ui/**",
+            	        "/swagger-ui.html",
+            	        "/v3/api-docs/**"
+            	    ).permitAll()
                 .requestMatchers("/dashboard/**").authenticated()
                 .requestMatchers("/utilisateur/**").hasRole("ADMIN")
                 .requestMatchers("/produit/add", "/produit/update/**", "/produit/delete/**")
