@@ -1,11 +1,13 @@
 package tn.itbs.projet.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import tn.itbs.projet.entities.Stock;
@@ -17,9 +19,15 @@ public class StockService {
     @Autowired
     private StockRepository stockRepo;
 
-    public ResponseEntity<String> ajouterStock(Stock stock) {
+    public ResponseEntity<String> ajouterStock(Stock stock, BindingResult result) {
+        if (result.hasErrors()) {
+            String erreurs = result.getFieldErrors().stream()
+                .map(e -> e.getField() + " : " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+            return ResponseEntity.badRequest().body(erreurs);
+        }
         stockRepo.save(stock);
-        return ResponseEntity.ok("Stock ajouté avec succès");
+        return ResponseEntity.ok("Stock ajouté avec succès !");
     }
 
     public List<Stock> getTousLesStocks() {
@@ -27,9 +35,8 @@ public class StockService {
     }
 
     public Stock trouverStockParId(int idStock) {
-        return stockRepo.findById(idStock).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !")
-        );
+        return stockRepo.findById(idStock)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !"));
     }
 
     public List<Stock> getStocksParEntrepot(int idEntrepot) {
@@ -40,40 +47,50 @@ public class StockService {
         return stockRepo.findByProduitIdProduit(idProduit);
     }
 
-    // ✅ Alerte automatique : retourne tous les stocks en dessous du seuil
     public List<Stock> getStocksEnAlerte() {
-        List<Stock> tousLesStocks = stockRepo.findAll();
-        return tousLesStocks.stream()
-            .filter(s -> s.getQuantite() <= s.getSeuilAlerte())
-            .toList();
+        return stockRepo.findAll().stream()
+            .filter(s -> s.getQuantite() < s.getSeuilAlerte())
+            .collect(Collectors.toList());
     }
 
-    // ✅ Vérification alerte pour un stock précis
     public ResponseEntity<String> verifierAlerte(int idStock) {
-        Stock stock = trouverStockParId(idStock);
-        if (stock.getQuantite() <= stock.getSeuilAlerte()) {
-            return ResponseEntity.ok("⚠️ ALERTE : Stock bas pour le produit ["
-                + stock.getProduit().getNom() + "] dans l'entrepôt ["
-                + stock.getEntrepot().getNom() + "] — Quantité actuelle : "
-                + stock.getQuantite());
+        Stock stock = stockRepo.findById(idStock)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !"));
+        if (stock.getQuantite() < stock.getSeuilAlerte()) {
+            return ResponseEntity.ok("⚠️ ALERTE : Stock bas ! Quantité : " + stock.getQuantite());
         }
-        return ResponseEntity.ok("✅ Stock suffisant");
+        return ResponseEntity.ok("✅ Stock suffisant. Quantité : " + stock.getQuantite());
     }
 
-    public ResponseEntity<String> mettreAJourStock(int idStock, Stock stock) {
-        stockRepo.findById(idStock).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !")
+    public ResponseEntity<String> mettreAJourStock(int idStock, Stock nv, BindingResult result) {
+        if (result.hasErrors()) {
+            String erreurs = result.getFieldErrors().stream()
+                .map(e -> e.getField() + " : " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+            return ResponseEntity.badRequest().body(erreurs);
+        }
+        stockRepo.findById(idStock).ifPresentOrElse(
+            s -> {
+                s.setQuantite(nv.getQuantite());
+                s.setSeuilAlerte(nv.getSeuilAlerte());
+                s.setProduit(nv.getProduit());
+                s.setEntrepot(nv.getEntrepot());
+                stockRepo.save(s);
+            },
+            () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !");
+            }
         );
-        stock.setIdStock(idStock);
-        stockRepo.save(stock);
-        return ResponseEntity.ok("Stock mis à jour avec succès");
+        return ResponseEntity.ok("Stock mis à jour avec succès !");
     }
 
     public ResponseEntity<String> supprimerStock(int idStock) {
         stockRepo.findById(idStock).ifPresentOrElse(
             s -> stockRepo.delete(s),
-            () -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !"); }
+            () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Stock non trouvé !");
+            }
         );
-        return ResponseEntity.ok("Stock supprimé avec succès");
+        return ResponseEntity.ok("Stock supprimé avec succès !");
     }
 }

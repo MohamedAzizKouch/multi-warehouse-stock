@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import tn.itbs.projet.entities.Stock;
 import tn.itbs.projet.services.StockService;
 
@@ -17,8 +19,8 @@ public class StockController {
     private StockService stockService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> ajouterStock(@RequestBody Stock stock) {
-        return stockService.ajouterStock(stock);
+    public ResponseEntity<String> ajouterStock(@Valid @RequestBody Stock stock, BindingResult result) {
+        return stockService.ajouterStock(stock, result);
     }
 
     @GetMapping("/all")
@@ -41,13 +43,11 @@ public class StockController {
         return stockService.getStocksParProduit(idProduit);
     }
 
-    //  Endpoint alertes stock bas
     @GetMapping("/alertes")
     public List<Stock> getStocksEnAlerte() {
         return stockService.getStocksEnAlerte();
     }
 
-    // Vérification alerte pour un stock précis
     @GetMapping("/alerte/{idStock}")
     public ResponseEntity<String> verifierAlerte(@PathVariable int idStock) {
         return stockService.verifierAlerte(idStock);
@@ -55,8 +55,9 @@ public class StockController {
 
     @PutMapping("/update/{idStock}")
     public ResponseEntity<String> mettreAJourStock(@PathVariable int idStock,
-                                                    @RequestBody Stock stock) {
-        return stockService.mettreAJourStock(idStock, stock);
+                                                    @Valid @RequestBody Stock stock,
+                                                    BindingResult result) {
+        return stockService.mettreAJourStock(idStock, stock, result);
     }
 
     @DeleteMapping("/delete/{idStock}")

@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import tn.itbs.projet.entities.MouvementStock;
 import tn.itbs.projet.entities.MouvementStock.TypeMouvement;
 import tn.itbs.projet.services.MouvementStockService;
@@ -19,16 +21,14 @@ public class MouvementStockController {
     @Autowired
     private MouvementStockService mouvementService;
 
-    // Entrée de stock
     @PostMapping("/entree")
-    public ResponseEntity<String> entreeStock(@RequestBody MouvementStock mouvement) {
-        return mouvementService.entreeStock(mouvement);
+    public ResponseEntity<String> entreeStock(@Valid @RequestBody MouvementStock mouvement, BindingResult result) {
+        return mouvementService.entreeStock(mouvement, result);
     }
 
-    //  Sortie de stock
     @PostMapping("/sortie")
-    public ResponseEntity<String> sortieStock(@RequestBody MouvementStock mouvement) {
-        return mouvementService.sortieStock(mouvement);
+    public ResponseEntity<String> sortieStock(@Valid @RequestBody MouvementStock mouvement, BindingResult result) {
+        return mouvementService.sortieStock(mouvement, result);
     }
 
     @GetMapping("/all")
@@ -56,7 +56,6 @@ public class MouvementStockController {
         return mouvementService.getMouvementsParEntrepot(idEntrepot);
     }
 
-    // filtrer par periode : /mouvement/periode?debut=...&fin=...
     @GetMapping("/periode")
     public List<MouvementStock> getMouvementsEntreDates(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime debut,

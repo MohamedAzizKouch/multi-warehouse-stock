@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import tn.itbs.projet.entities.Utilisateur;
 import tn.itbs.projet.entities.Utilisateur.Role;
 import tn.itbs.projet.services.UtilisateurService;
@@ -18,8 +20,9 @@ public class UtilisateurController {
     private UtilisateurService utilisateurService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> ajouterUtilisateur(@RequestBody Utilisateur utilisateur) {
-        return utilisateurService.ajouterUtilisateur(utilisateur);
+    public ResponseEntity<String> ajouterUtilisateur(@Valid @RequestBody Utilisateur utilisateur,
+                                                      BindingResult result) {
+        return utilisateurService.ajouterUtilisateur(utilisateur, result);
     }
 
     @GetMapping("/all")
@@ -44,8 +47,9 @@ public class UtilisateurController {
 
     @PutMapping("/update/{idUtilisateur}")
     public ResponseEntity<String> mettreAJourUtilisateur(@PathVariable int idUtilisateur,
-                                                          @RequestBody Utilisateur utilisateur) {
-        return utilisateurService.mettreAJourUtilisateur(idUtilisateur, utilisateur);
+                                                          @Valid @RequestBody Utilisateur utilisateur,
+                                                          BindingResult result) {
+        return utilisateurService.mettreAJourUtilisateur(idUtilisateur, utilisateur, result);
     }
 
     @DeleteMapping("/delete/{idUtilisateur}")

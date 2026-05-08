@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import tn.itbs.projet.entities.Produit;
 import tn.itbs.projet.services.ProduitService;
+import org.springframework.validation.BindingResult;
 
 @RestController
 @RequestMapping("/produit")
@@ -17,8 +19,8 @@ public class ProduitController {
     private ProduitService produitService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> ajouterProduit(@RequestBody Produit produit) {
-        return produitService.ajouterProduit(produit);
+    public ResponseEntity<String> ajouterProduit(@Valid @RequestBody Produit produit, BindingResult result) {
+        return produitService.ajouterProduit(produit, result);
     }
 
     @GetMapping("/all")
@@ -47,9 +49,10 @@ public class ProduitController {
     }
 
     @PutMapping("/update/{idProduit}")
-    public ResponseEntity<String> mettreAJourProduit(@PathVariable int idProduit,
-                                                      @RequestBody Produit produit) {
-        return produitService.mettreAJourProduit(idProduit, produit);
+    public ResponseEntity<String> mettreAJourProduit(@PathVariable int idProduit, 
+                                                       @Valid @RequestBody Produit produit, 
+                                                       BindingResult result) {
+        return produitService.mettreAJourProduit(idProduit, produit, result);
     }
 
     @DeleteMapping("/delete/{idProduit}")

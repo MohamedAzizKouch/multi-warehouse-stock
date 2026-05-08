@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.validation.constraints.*;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -17,16 +19,21 @@ public class MouvementStock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idMouvement;
 
+    @NotNull(message = "Le type de mouvement est obligatoire")
     @Enumerated(EnumType.STRING)
-    private TypeMouvement type;   // ENTREE ou SORTIE
+    private TypeMouvement type;
 
+    @Positive(message = "La quantité doit être positive")
     private int quantite;
+
     private LocalDateTime date;
 
+    @NotNull(message = "Le produit est obligatoire")
     @ManyToOne
     @JoinColumn(name = "idProduit")
     private Produit produit;
 
+    @NotNull(message = "L'entrepôt est obligatoire")
     @ManyToOne
     @JoinColumn(name = "idEntrepot")
     private Entrepot entrepot;

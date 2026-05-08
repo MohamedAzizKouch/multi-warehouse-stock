@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import tn.itbs.projet.entities.Entrepot;
 import tn.itbs.projet.services.EntrepotService;
 
@@ -17,8 +19,8 @@ public class EntrepotController {
     private EntrepotService entrepotService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> ajouterEntrepot(@RequestBody Entrepot entrepot) {
-        return entrepotService.ajouterEntrepot(entrepot);
+    public ResponseEntity<String> ajouterEntrepot(@Valid @RequestBody Entrepot entrepot, BindingResult result) {
+        return entrepotService.ajouterEntrepot(entrepot, result);
     }
 
     @GetMapping("/all")
@@ -38,8 +40,9 @@ public class EntrepotController {
 
     @PutMapping("/update/{idEntrepot}")
     public ResponseEntity<String> mettreAJourEntrepot(@PathVariable int idEntrepot,
-                                                       @RequestBody Entrepot entrepot) {
-        return entrepotService.mettreAJourEntrepot(idEntrepot, entrepot);
+                                                       @Valid @RequestBody Entrepot entrepot,
+                                                       BindingResult result) {
+        return entrepotService.mettreAJourEntrepot(idEntrepot, entrepot, result);
     }
 
     @DeleteMapping("/delete/{idEntrepot}")

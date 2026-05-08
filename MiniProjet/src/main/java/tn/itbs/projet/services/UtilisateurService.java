@@ -1,11 +1,13 @@
 package tn.itbs.projet.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import tn.itbs.projet.entities.Utilisateur;
@@ -18,9 +20,15 @@ public class UtilisateurService {
     @Autowired
     private UtilisateurRepository utilisateurRepo;
 
-    public ResponseEntity<String> ajouterUtilisateur(Utilisateur utilisateur) {
+    public ResponseEntity<String> ajouterUtilisateur(Utilisateur utilisateur, BindingResult result) {
+        if (result.hasErrors()) {
+            String erreurs = result.getFieldErrors().stream()
+                .map(e -> e.getField() + " : " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+            return ResponseEntity.badRequest().body(erreurs);
+        }
         utilisateurRepo.save(utilisateur);
-        return ResponseEntity.ok("Utilisateur ajouté avec succès");
+        return ResponseEntity.ok("Utilisateur ajouté avec succès !");
     }
 
     public List<Utilisateur> getTousLesUtilisateurs() {
@@ -28,9 +36,8 @@ public class UtilisateurService {
     }
 
     public Utilisateur trouverUtilisateurParId(int idUtilisateur) {
-        return utilisateurRepo.findById(idUtilisateur).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !")
-        );
+        return utilisateurRepo.findById(idUtilisateur)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !"));
     }
 
     public Utilisateur trouverParEmail(String email) {
@@ -45,20 +52,35 @@ public class UtilisateurService {
         return utilisateurRepo.findByRole(role);
     }
 
-    public ResponseEntity<String> mettreAJourUtilisateur(int idUtilisateur, Utilisateur utilisateur) {
-        utilisateurRepo.findById(idUtilisateur).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !")
+    public ResponseEntity<String> mettreAJourUtilisateur(int idUtilisateur, Utilisateur nv, BindingResult result) {
+        if (result.hasErrors()) {
+            String erreurs = result.getFieldErrors().stream()
+                .map(e -> e.getField() + " : " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+            return ResponseEntity.badRequest().body(erreurs);
+        }
+        utilisateurRepo.findById(idUtilisateur).ifPresentOrElse(
+            u -> {
+                u.setNom(nv.getNom());
+                u.setEmail(nv.getEmail());
+                u.setMotDePasse(nv.getMotDePasse());
+                u.setRole(nv.getRole());
+                utilisateurRepo.save(u);
+            },
+            () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !");
+            }
         );
-        utilisateur.setIdUtilisateur(idUtilisateur);
-        utilisateurRepo.save(utilisateur);
-        return ResponseEntity.ok("Utilisateur mis à jour avec succès");
+        return ResponseEntity.ok("Utilisateur mis à jour avec succès !");
     }
 
     public ResponseEntity<String> supprimerUtilisateur(int idUtilisateur) {
         utilisateurRepo.findById(idUtilisateur).ifPresentOrElse(
             u -> utilisateurRepo.delete(u),
-            () -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !"); }
+            () -> {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé !");
+            }
         );
-        return ResponseEntity.ok("Utilisateur supprimé avec succès");
+        return ResponseEntity.ok("Utilisateur supprimé avec succès !");
     }
 }
