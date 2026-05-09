@@ -1,1 +1,120 @@
-<p>stock works!</p>
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>📋 Gestion des Stocks</h2>
+    <div class="d-flex gap-2">
+      <button class="btn btn-danger" (click)="afficherAlertes = !afficherAlertes">
+        ⚠️ Alertes ({{ alertes.length }})
+      </button>
+      <button class="btn btn-primary" (click)="ouvrirAjout()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <!-- Alertes -->
+  <div *ngIf="afficherAlertes && alertes.length > 0" class="alertes-panel mb-4">
+    <h6>⚠️ Stocks en dessous du seuil d'alerte</h6>
+    <div class="row g-2">
+      <div *ngFor="let a of alertes" class="col-md-4">
+        <div class="alerte-item">
+          <strong>{{ a.produit?.nom }}</strong>
+          <span class="text-muted d-block">{{ a.entrepot?.nom }}</span>
+          <span class="badge bg-danger">{{ a.quantite }} / {{ a.seuilAlerte }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="afficherAlertes && alertes.length === 0" class="alert alert-success">
+    ✅ Tous les stocks sont suffisants
+  </div>
+
+  <div *ngIf="message" class="alert alert-{{ messageType }}">{{ message }}</div>
+
+  <div class="search-bar mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="🔍 Rechercher par produit ou entrepôt..."
+      [(ngModel)]="recherche"
+      (input)="filtrer()"
+    />
+  </div>
+
+  <!-- Formulaire -->
+  <div *ngIf="afficherFormulaire" class="formulaire-card mb-4">
+    <h5>{{ modeEdition ? '✏️ Modifier' : '➕ Nouveau' }} Stock</h5>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Produit</label>
+        <select class="form-select" [(ngModel)]="stockForm.produit.idProduit">
+          <option [value]="null" disabled>-- Choisir --</option>
+          <option *ngFor="let p of produits" [value]="p.idProduit">{{ p.nom }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Entrepôt</label>
+        <select class="form-select" [(ngModel)]="stockForm.entrepot.idEntrepot">
+          <option [value]="null" disabled>-- Choisir --</option>
+          <option *ngFor="let e of entrepots" [value]="e.idEntrepot">{{ e.nom }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Quantité</label>
+        <input type="number" class="form-control" [(ngModel)]="stockForm.quantite" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Seuil Alerte</label>
+        <input type="number" class="form-control" [(ngModel)]="stockForm.seuilAlerte" />
+      </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-success" (click)="sauvegarder()">
+        {{ modeEdition ? 'Mettre à jour' : 'Ajouter' }}
+      </button>
+      <button class="btn btn-secondary" (click)="afficherFormulaire = false">Annuler</button>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-card">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Produit</th>
+          <th>Entrepôt</th>
+          <th>Quantité</th>
+          <th>Seuil Alerte</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of stocksFiltres" [class.ligne-alerte]="estEnAlerte(s)">
+          <td>{{ s.idStock }}</td>
+          <td><strong>{{ s.produit?.nom }}</strong></td>
+          <td>{{ s.entrepot?.nom }}</td>
+          <td>{{ s.quantite }}</td>
+          <td>{{ s.seuilAlerte }}</td>
+          <td>
+            <span class="badge" [class.bg-danger]="estEnAlerte(s)" [class.bg-success]="!estEnAlerte(s)">
+              {{ estEnAlerte(s) ? '⚠️ Alerte' : '✅ OK' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1" (click)="ouvrirEdition(s)">✏️</button>
+            <button class="btn btn-sm btn-danger" (click)="supprimer(s.idStock!)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="stocksFiltres.length === 0">
+          <td colspan="7" class="text-center text-muted py-4">Aucun stock trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-2 text-muted">
+    <small>Total : {{ stocksFiltres.length }} stock(s)</small>
+  </div>
+
+</div>
