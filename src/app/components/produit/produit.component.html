@@ -1,1 +1,96 @@
-<p>produit works!</p>
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>📦 Gestion des Produits</h2>
+    <button class="btn btn-primary" (click)="ouvrirAjout()">+ Ajouter</button>
+  </div>
+
+  <!-- Message -->
+  <div *ngIf="message" class="alert alert-{{ messageType }} alert-dismissible">
+    {{ message }}
+  </div>
+
+  <!-- Recherche -->
+  <div class="search-bar mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="🔍 Rechercher par nom, catégorie, fournisseur..."
+      [(ngModel)]="recherche"
+      (input)="filtrer()"
+    />
+  </div>
+
+  <!-- Formulaire -->
+  <div *ngIf="afficherFormulaire" class="formulaire-card mb-4">
+    <h5>{{ modeEdition ? '✏️ Modifier' : '➕ Nouveau' }} Produit</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Nom</label>
+        <input type="text" class="form-control" [(ngModel)]="produitForm.nom" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Catégorie</label>
+        <input type="text" class="form-control" [(ngModel)]="produitForm.categorie" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Prix (DT)</label>
+        <input type="number" class="form-control" [(ngModel)]="produitForm.prix" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Fournisseur</label>
+        <input type="text" class="form-control" [(ngModel)]="produitForm.fournisseur" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Seuil Minimum</label>
+        <input type="number" class="form-control" [(ngModel)]="produitForm.seuilMin" />
+      </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-success" (click)="sauvegarder()">
+        {{ modeEdition ? 'Mettre à jour' : 'Ajouter' }}
+      </button>
+      <button class="btn btn-secondary" (click)="afficherFormulaire = false">Annuler</button>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-card">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Catégorie</th>
+          <th>Prix</th>
+          <th>Fournisseur</th>
+          <th>Seuil Min</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of produitsFiltres">
+          <td>{{ p.idProduit }}</td>
+          <td><strong>{{ p.nom }}</strong></td>
+          <td><span class="badge bg-secondary">{{ p.categorie }}</span></td>
+          <td>{{ p.prix | number:'1.2-2' }} DT</td>
+          <td>{{ p.fournisseur }}</td>
+          <td>{{ p.seuilMin }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1" (click)="ouvrirEdition(p)">✏️</button>
+            <button class="btn btn-sm btn-danger" (click)="supprimer(p.idProduit!)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="produitsFiltres.length === 0">
+          <td colspan="7" class="text-center text-muted py-4">Aucun produit trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-2 text-muted">
+    <small>Total : {{ produitsFiltres.length }} produit(s)</small>
+  </div>
+
+</div>

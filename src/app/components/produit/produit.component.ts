@@ -1,11 +1,100 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ProduitService } from '../../services/produit.service';
+import { Produit } from '../../models/produit.model';
 
 @Component({
   selector: 'app-produit',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './produit.component.html',
   styleUrl: './produit.component.css'
 })
-export class ProduitComponent {}
+export class ProduitComponent implements OnInit {
+
+  produits: Produit[] = [];
+  produitsFiltres: Produit[] = [];
+  recherche = '';
+  message = '';
+  messageType = '';
+  afficherFormulaire = false;
+  modeEdition = false;
+
+  produitForm: Produit = {
+    nom: '', categorie: '', prix: 0, fournisseur: '', seuilMin: 0
+  };
+
+  constructor(private produitService: ProduitService) {}
+
+  ngOnInit(): void {
+    this.chargerProduits();
+  }
+
+  chargerProduits(): void {
+    this.produitService.getAll().subscribe(data => {
+      this.produits = data;
+      this.produitsFiltres = data;
+    });
+  }
+
+  filtrer(): void {
+    this.produitsFiltres = this.produits.filter(p =>
+      p.nom.toLowerCase().includes(this.recherche.toLowerCase()) ||
+      p.categorie.toLowerCase().includes(this.recherche.toLowerCase()) ||
+      p.fournisseur.toLowerCase().includes(this.recherche.toLowerCase())
+    );
+  }
+
+  ouvrirAjout(): void {
+    this.produitForm = { nom: '', categorie: '', prix: 0, fournisseur: '', seuilMin: 0 };
+    this.modeEdition = false;
+    this.afficherFormulaire = true;
+  }
+
+  ouvrirEdition(p: Produit): void {
+    this.produitForm = { ...p };
+    this.modeEdition = true;
+    this.afficherFormulaire = true;
+  }
+
+  sauvegarder(): void {
+    if (this.modeEdition && this.produitForm.idProduit) {
+      this.produitService.update(this.produitForm.idProduit, this.produitForm).subscribe({
+        next: (msg) => {
+          this.afficherMessage(msg, 'success');
+          this.chargerProduits();
+          this.afficherFormulaire = false;
+        },
+        error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
+      });
+    } else {
+      this.produitService.add(this.produitForm).subscribe({
+        next: (msg) => {
+          this.afficherMessage(msg, 'success');
+          this.chargerProduits();
+          this.afficherFormulaire = false;
+        },
+        error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
+      });
+    }
+  }
+
+  supprimer(id: number): void {
+    if (confirm('Confirmer la suppression ?')) {
+      this.produitService.delete(id).subscribe({
+        next: (msg) => {
+          this.afficherMessage(msg, 'success');
+          this.chargerProduits();
+        },
+        error: () => this.afficherMessage('Erreur lors de la suppression', 'danger')
+      });
+    }
+  }
+
+  afficherMessage(msg: string, type: string): void {
+    this.message = msg;
+    this.messageType = type;
+    setTimeout(() => this.message = '', 3000);
+  }
+}
