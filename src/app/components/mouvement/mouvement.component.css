@@ -1,0 +1,46 @@
+.page-container {
+  padding: 24px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.formulaire-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.formulaire-card.entree {
+  border-left: 4px solid #28a745;
+}
+
+.formulaire-card.entree h5 { color: #28a745; font-weight: 600; margin-bottom: 20px; }
+
+.formulaire-card.sortie {
+  border-left: 4px solid #dc3545;
+}
+
+.formulaire-card.sortie h5 { color: #dc3545; font-weight: 600; margin-bottom: 20px; }
+
+.table-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.table thead {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  color: white;
+}
+
+.table thead th { border: none; padding: 14px 16px; }
+.table tbody td { padding: 12px 16px; vertical-align: middle; }
