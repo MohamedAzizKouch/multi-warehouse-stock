@@ -1,1 +1,77 @@
-<p>entrepot works!</p>
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>🏢 Gestion des Entrepôts</h2>
+    <button class="btn btn-primary" (click)="ouvrirAjout()">+ Ajouter</button>
+  </div>
+
+  <div *ngIf="message" class="alert alert-{{ messageType }}">{{ message }}</div>
+
+  <div class="search-bar mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="🔍 Rechercher par nom ou adresse..."
+      [(ngModel)]="recherche"
+      (input)="filtrer()"
+    />
+  </div>
+
+  <div *ngIf="afficherFormulaire" class="formulaire-card mb-4">
+    <h5>{{ modeEdition ? '✏️ Modifier' : '➕ Nouvel' }} Entrepôt</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Nom</label>
+        <input type="text" class="form-control" [(ngModel)]="entrepotForm.nom" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Adresse</label>
+        <input type="text" class="form-control" [(ngModel)]="entrepotForm.adresse" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Capacité</label>
+        <input type="number" class="form-control" [(ngModel)]="entrepotForm.capacite" />
+      </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-success" (click)="sauvegarder()">
+        {{ modeEdition ? 'Mettre à jour' : 'Ajouter' }}
+      </button>
+      <button class="btn btn-secondary" (click)="afficherFormulaire = false">Annuler</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Adresse</th>
+          <th>Capacité</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of entrepotsFiltres">
+          <td>{{ e.idEntrepot }}</td>
+          <td><strong>{{ e.nom }}</strong></td>
+          <td>{{ e.adresse }}</td>
+          <td>{{ e.capacite | number }} unités</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1" (click)="ouvrirEdition(e)">✏️</button>
+            <button class="btn btn-sm btn-danger" (click)="supprimer(e.idEntrepot!)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="entrepotsFiltres.length === 0">
+          <td colspan="5" class="text-center text-muted py-4">Aucun entrepôt trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-2 text-muted">
+    <small>Total : {{ entrepotsFiltres.length }} entrepôt(s)</small>
+  </div>
+
+</div>
