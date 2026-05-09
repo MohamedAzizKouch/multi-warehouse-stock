@@ -8,7 +8,7 @@ import { Stock } from '../models/stock.model';
 })
 export class StockService {
 
-  private url = 'http://localhost:8080/stock';
+  private url = 'http://localhost:9090/stock';
 
   constructor(private http: HttpClient) {}
 

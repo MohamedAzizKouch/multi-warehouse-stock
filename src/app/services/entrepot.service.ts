@@ -8,7 +8,7 @@ import { Entrepot } from '../models/entrepot.model';
 })
 export class EntrepotService {
 
-  private url = 'http://localhost:8080/entrepot';
+  private url = 'http://localhost:9090/entrepot';
 
   constructor(private http: HttpClient) {}
 

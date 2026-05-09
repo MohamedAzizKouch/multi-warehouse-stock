@@ -1,0 +1,123 @@
+<div class="dashboard-container">
+
+  <h2 class="mb-4">📊 Tableau de bord</h2>
+
+  <!-- Cartes statistiques -->
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+      <div class="stat-card blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+          <h3>{{ totalProduits }}</h3>
+          <p>Produits</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card green">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-info">
+          <h3>{{ totalEntrepots }}</h3>
+          <p>Entrepôts</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card purple">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+          <h3>{{ totalStocks }}</h3>
+          <p>Stocks</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card orange">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-info">
+          <h3>{{ totalMouvements }}</h3>
+          <p>Mouvements</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Alertes stock bas -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header alert-header">
+          ⚠️ Stocks en Alerte ({{ stocksEnAlerte.length }})
+        </div>
+        <div class="card-body p-0">
+          <div *ngIf="stocksEnAlerte.length === 0" class="text-center p-4 text-success">
+            ✅ Tous les stocks sont suffisants
+          </div>
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let s of stocksEnAlerte" class="list-group-item alerte-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ s.produit?.nom }}</strong>
+                  <small class="d-block text-muted">{{ s.entrepot?.nom }}</small>
+                </div>
+                <span class="badge bg-danger">{{ s.quantite }} / {{ s.seuilAlerte }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Derniers mouvements -->
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header">🔄 Derniers Mouvements</div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let m of derniersMouvements" class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ m.produit?.nom }}</strong>
+                  <small class="d-block text-muted">{{ m.entrepot?.nom }}</small>
+                </div>
+                <div class="text-end">
+                  <span class="badge"
+                    [class.bg-success]="m.type === 'ENTREE'"
+                    [class.bg-danger]="m.type === 'SORTIE'">
+                    {{ m.type }}
+                  </span>
+                  <small class="d-block text-muted">qté : {{ m.quantite }}</small>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Raccourcis -->
+  <div class="row g-3 mt-2">
+    <div class="col-12"><h5>🚀 Accès rapide</h5></div>
+    <div class="col-md-2">
+      <a routerLink="/produits" class="btn btn-outline-primary w-100">📦 Produits</a>
+    </div>
+    <div class="col-md-2">
+      <a routerLink="/entrepots" class="btn btn-outline-success w-100">🏢 Entrepôts</a>
+    </div>
+    <div class="col-md-2">
+      <a routerLink="/stocks" class="btn btn-outline-purple w-100">📋 Stocks</a>
+    </div>
+    <div class="col-md-2">
+      <a routerLink="/mouvements" class="btn btn-outline-warning w-100">🔄 Mouvements</a>
+    </div>
+  </div>
+
+</div>

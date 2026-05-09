@@ -8,7 +8,7 @@ import { MouvementStock } from '../models/mouvement.model';
 })
 export class MouvementService {
 
-  private url = 'http://localhost:8080/mouvement';
+  private url = 'http://localhost:9090/mouvement';
 
   constructor(private http: HttpClient) {}
 
