@@ -1,63 +1,215 @@
-<<<<<<< HEAD
-# StockFrontend
+# 🏭 Multi-Warehouse Stock Management System
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.10.
+A full-stack web application for managing inventory across multiple warehouses,
+built with **Spring Boot** (REST API) and **Angular** (Frontend UI).
 
-## Development server
+---
 
-To start a local development server, run:
+## 📋 Table of Contents
+
+- [Description](#description)
+- [Technologies](#technologies)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation & Running](#installation--running)
+- [Default Credentials](#default-credentials)
+- [API Documentation](#api-documentation)
+- [Security & Roles](#security--roles)
+
+---
+
+## 📖 Description
+
+This system allows businesses to efficiently manage their stock across
+multiple warehouses. It supports real-time stock tracking, automatic
+low-stock alerts, and role-based access control for different user types.
+
+---
+
+## 🛠️ Technologies
+
+### Backend
+| Technology | Version |
+|---|---|
+| Java | 17 |
+| Spring Boot | 4.0.6 |
+| Spring Security | Basic Auth |
+| Spring Data JPA | Hibernate 7 |
+| Spring Validator | Bean Validation |
+| MySQL | 5.7 |
+| Swagger / OpenAPI | 3 (springdoc 2.8.6) |
+| Maven | 3.9.6 |
+
+### Frontend
+| Technology | Version |
+|---|---|
+| Angular | 17+ |
+| TypeScript | 5+ |
+| Bootstrap | 5 |
+| Nginx | Alpine |
+
+### DevOps
+| Technology | Usage |
+|---|---|
+| Docker | Containerization |
+| Docker Compose | Multi-container orchestration |
+
+---
+
+## ✅ Features
+
+- 📦 **Product Management** — Full CRUD with search by name, category, supplier
+- 🏢 **Warehouse Management** — Full CRUD with capacity tracking
+- 📋 **Stock Management** — Track stock per product per warehouse
+- ⚠️ **Automatic Alerts** — Detect and display low-stock items in real time
+- 🔄 **Stock Movements** — Record stock entries and exits with automatic quantity updates
+- 📊 **Dashboard** — Overview of total products, warehouses, stocks and movements
+- 🔐 **Authentication** — HTTP Basic Auth with role-based access control
+- 📝 **API Documentation** — Interactive Swagger UI
+
+---
+
+## 📁 Project Structure
+multi-warehouse-stock/
+├── MiniProjet/                    # Spring Boot Backend
+│   ├── src/
+│   │   └── main/java/tn/itbs/projet/
+│   │       ├── controllers/       # REST Controllers
+│   │       ├── entities/          # JPA Entities
+│   │       ├── repositories/      # Spring Data Repositories
+│   │       ├── services/          # Business Logic
+│   │       └── security/          # Spring Security Config
+│   ├── Dockerfile
+│   └── pom.xml
+├── src/                           # Angular Frontend
+│   └── app/
+│       ├── components/            # UI Components
+│       ├── services/              # HTTP Services
+│       ├── models/                # TypeScript Interfaces
+│       ├── guards/                # Route Guards
+│       └── interceptors/          # HTTP Interceptors
+├── Dockerfile                     # Angular Dockerfile
+├── nginx.conf                     # Nginx Configuration
+├── docker-compose.yml             # Docker Compose
+└── README.md
+
+---
+
+## 📦 Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running
+- Git
+
+---
+
+## 🚀 Installation & Running
+
+### Option 1 — Docker (Recommended)
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/MohamedAzizKouch/multi-warehouse-stock.git
+cd multi-warehouse-stock
+
+# 2. Build and start all services
+docker compose build --no-cache
+docker compose up
+```
+
+Wait for all 3 containers to start:
+- ✅ `mysql_stock` — Database
+- ✅ `spring_backend` — REST API
+- ✅ `angular_frontend` — Web UI
+
+### Access the Application
+
+| Service | URL |
+|---|---|
+| 🌐 Frontend (Angular) | http://localhost |
+| ⚙️ Backend API | http://localhost:9090 |
+| 📝 Swagger UI | http://localhost:9090/swagger-ui/index.html |
+
+### Stop the Application
+
+```bash
+docker compose down
+```
+
+---
+
+### Option 2 — Manual (Development)
+
+**Backend (Eclipse or IntelliJ):**
+```bash
+# Import MiniProjet as Maven project
+# Configure src/main/resources/application.properties
+# Run MiniProjetApplication.java
+# API available at http://localhost:9090
+```
+
+**Frontend (VS Code):**
+```bash
+cd stock-frontend
+npm install
 ng serve
+# UI available at http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🔑 Default Credentials
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+| Email | Password | Role |
+|---|---|---|
+| admin@stock.tn | admin123 | ADMIN |
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 📝 API Documentation
 
-```bash
-ng generate --help
-```
+Full interactive API documentation available at:
+http://localhost:9090/swagger-ui/index.html
 
-## Building
+### Main Endpoints
 
-To build the project run:
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/produit/add` | Add a product |
+| `GET` | `/produit/all` | Get all products |
+| `PUT` | `/produit/update/{id}` | Update a product |
+| `DELETE` | `/produit/delete/{id}` | Delete a product |
+| `POST` | `/entrepot/add` | Add a warehouse |
+| `GET` | `/entrepot/all` | Get all warehouses |
+| `POST` | `/stock/add` | Add a stock entry |
+| `GET` | `/stock/alertes` | Get low-stock alerts |
+| `POST` | `/mouvement/entree` | Record stock entry |
+| `POST` | `/mouvement/sortie` | Record stock exit |
+| `GET` | `/dashboard/stats` | Get dashboard statistics |
 
-```bash
-ng build
-```
+---
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## 🔐 Security & Roles
 
-## Running unit tests
+| Role | Permissions |
+|---|---|
+| `ADMIN` | Full access — manage users, products, warehouses, stocks, movements |
+| `GESTIONNAIRE` | Manage products, warehouses, stocks and movements (no user management) |
+| `OBSERVATEUR` | Read-only access to all resources |
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Authentication uses **HTTP Basic Auth**.
+All endpoints except Swagger UI require authentication.
 
-```bash
-ng test
-```
+---
 
-## Running end-to-end tests
+## 👤 Author
 
-For end-to-end (e2e) testing, run:
+**Mohamed Aziz Kouch**
+- GitHub: [@MohamedAzizKouch](https://github.com/MohamedAzizKouch)
 
-```bash
-ng e2e
-```
+---
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 🏫 Academic Context
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-=======
-# multi-warehouse-stock
->>>>>>> 7773379748b0f1fa0e560657c97ef1fac437b026
+Project developed as part of the **ITBS** curriculum.
+Subject: Multi-Warehouse Stock Management System.
