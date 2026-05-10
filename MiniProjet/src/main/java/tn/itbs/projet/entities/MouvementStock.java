@@ -24,7 +24,7 @@ public class MouvementStock {
     private TypeMouvement type;
 
     @Positive(message = "La quantité doit être positive")
-    private int quantite;
+    private Integer quantite;
 
     private LocalDateTime date;
 

@@ -30,7 +30,7 @@ public class Entrepot {
     private String adresse;
 
     @Positive(message = "La capacité doit être positive")
-    private int capacite;
+    private Integer capacite;
 
     @OneToMany(mappedBy = "entrepot")
     @JsonIgnore

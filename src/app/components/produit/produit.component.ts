@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProduitService } from '../../services/produit.service';
@@ -25,16 +25,23 @@ export class ProduitComponent implements OnInit {
     nom: '', categorie: '', prix: 0, fournisseur: '', seuilMin: 0
   };
 
-  constructor(private produitService: ProduitService) {}
+  constructor(
+    private produitService: ProduitService,
+    private cdr: ChangeDetectorRef   // ← ajouter
+  ) {}
 
   ngOnInit(): void {
     this.chargerProduits();
   }
 
   chargerProduits(): void {
-    this.produitService.getAll().subscribe(data => {
-      this.produits = data;
-      this.produitsFiltres = data;
+    this.produitService.getAll().subscribe({
+      next: (data) => {
+        this.produits = data;
+        this.produitsFiltres = [...data];
+        this.cdr.detectChanges();   // ← forcer la mise à jour
+      },
+      error: (err) => console.error('Erreur', err)
     });
   }
 
@@ -44,6 +51,7 @@ export class ProduitComponent implements OnInit {
       p.categorie.toLowerCase().includes(this.recherche.toLowerCase()) ||
       p.fournisseur.toLowerCase().includes(this.recherche.toLowerCase())
     );
+    this.cdr.detectChanges();
   }
 
   ouvrirAjout(): void {
@@ -62,18 +70,18 @@ export class ProduitComponent implements OnInit {
     if (this.modeEdition && this.produitForm.idProduit) {
       this.produitService.update(this.produitForm.idProduit, this.produitForm).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerProduits();
           this.afficherFormulaire = false;
+          this.chargerProduits();
+          this.afficherMessage(msg, 'success');
         },
         error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
       });
     } else {
       this.produitService.add(this.produitForm).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerProduits();
           this.afficherFormulaire = false;
+          this.chargerProduits();
+          this.afficherMessage(msg, 'success');
         },
         error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
       });
@@ -84,10 +92,10 @@ export class ProduitComponent implements OnInit {
     if (confirm('Confirmer la suppression ?')) {
       this.produitService.delete(id).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
           this.chargerProduits();
+          this.afficherMessage(msg, 'success');
         },
-        error: () => this.afficherMessage('Erreur lors de la suppression', 'danger')
+        error: () => this.afficherMessage('Erreur suppression', 'danger')
       });
     }
   }
@@ -95,6 +103,10 @@ export class ProduitComponent implements OnInit {
   afficherMessage(msg: string, type: string): void {
     this.message = msg;
     this.messageType = type;
-    setTimeout(() => this.message = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.message = '';
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

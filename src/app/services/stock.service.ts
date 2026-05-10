@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Stock } from '../models/stock.model';
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class StockService {
 
-  private url = 'http://localhost:9090/stock';
+  private url = `${environment.apiUrl}/stock`;
 
   constructor(private http: HttpClient) {}
 

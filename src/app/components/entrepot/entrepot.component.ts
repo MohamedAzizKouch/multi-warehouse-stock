@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntrepotService } from '../../services/entrepot.service';
@@ -25,16 +25,23 @@ export class EntrepotComponent implements OnInit {
     nom: '', adresse: '', capacite: 0
   };
 
-  constructor(private entrepotService: EntrepotService) {}
+  constructor(
+    private entrepotService: EntrepotService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.chargerEntrepots();
   }
 
   chargerEntrepots(): void {
-    this.entrepotService.getAll().subscribe(data => {
-      this.entrepots = data;
-      this.entrepotsFiltres = data;
+    this.entrepotService.getAll().subscribe({
+      next: (data) => {
+        this.entrepots = data;
+        this.entrepotsFiltres = [...data];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement entrepots', err)
     });
   }
 
@@ -43,6 +50,7 @@ export class EntrepotComponent implements OnInit {
       e.nom.toLowerCase().includes(this.recherche.toLowerCase()) ||
       e.adresse.toLowerCase().includes(this.recherche.toLowerCase())
     );
+    this.cdr.detectChanges();
   }
 
   ouvrirAjout(): void {
@@ -61,18 +69,18 @@ export class EntrepotComponent implements OnInit {
     if (this.modeEdition && this.entrepotForm.idEntrepot) {
       this.entrepotService.update(this.entrepotForm.idEntrepot, this.entrepotForm).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerEntrepots();
           this.afficherFormulaire = false;
+          this.chargerEntrepots();
+          this.afficherMessage(msg, 'success');
         },
         error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
       });
     } else {
       this.entrepotService.add(this.entrepotForm).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerEntrepots();
           this.afficherFormulaire = false;
+          this.chargerEntrepots();
+          this.afficherMessage(msg, 'success');
         },
         error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
       });
@@ -83,10 +91,10 @@ export class EntrepotComponent implements OnInit {
     if (confirm('Confirmer la suppression ?')) {
       this.entrepotService.delete(id).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
           this.chargerEntrepots();
+          this.afficherMessage(msg, 'success');
         },
-        error: () => this.afficherMessage('Erreur lors de la suppression', 'danger')
+        error: () => this.afficherMessage('Erreur suppression', 'danger')
       });
     }
   }
@@ -94,6 +102,10 @@ export class EntrepotComponent implements OnInit {
   afficherMessage(msg: string, type: string): void {
     this.message = msg;
     this.messageType = type;
-    setTimeout(() => this.message = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.message = '';
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

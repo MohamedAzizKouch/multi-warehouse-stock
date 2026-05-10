@@ -1,0 +1,53 @@
+services:
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql_stock
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_stock
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - stock_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./MiniProjet
+    container_name: spring_backend
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gestion_stock?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - stock_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: angular_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - stock_network
+
+networks:
+  stock_network:
+    driver: bridge
+
+volumes:
+  mysql_data:

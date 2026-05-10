@@ -32,7 +32,7 @@ public class Produit {
     
     
     @Positive(message = "Le prix doit être positif")
-    private double prix;
+    private Double prix;
     
     
     @NotBlank(message = "Le fournisseur est obligatoire")
@@ -40,7 +40,7 @@ public class Produit {
     
     
     @Min(value = 0, message = "Le seuil minimum ne peut pas être négatif")
-    private int seuilMin;
+    private Integer seuilMin;
 
     @OneToMany(mappedBy = "produit")
     @JsonIgnore

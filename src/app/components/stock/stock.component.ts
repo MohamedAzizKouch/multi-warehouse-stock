@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StockService } from '../../services/stock.service';
@@ -39,7 +39,8 @@ export class StockComponent implements OnInit {
   constructor(
     private stockService: StockService,
     private produitService: ProduitService,
-    private entrepotService: EntrepotService
+    private entrepotService: EntrepotService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -50,22 +51,44 @@ export class StockComponent implements OnInit {
   }
 
   chargerStocks(): void {
-    this.stockService.getAll().subscribe(data => {
-      this.stocks = data;
-      this.stocksFiltres = data;
+    this.stockService.getAll().subscribe({
+      next: (data) => {
+        this.stocks = data;
+        this.stocksFiltres = [...data];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement stocks', err)
     });
   }
 
   chargerProduits(): void {
-    this.produitService.getAll().subscribe(data => this.produits = data);
+    this.produitService.getAll().subscribe({
+      next: (data) => {
+        this.produits = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement produits', err)
+    });
   }
 
   chargerEntrepots(): void {
-    this.entrepotService.getAll().subscribe(data => this.entrepots = data);
+    this.entrepotService.getAll().subscribe({
+      next: (data) => {
+        this.entrepots = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement entrepots', err)
+    });
   }
 
   chargerAlertes(): void {
-    this.stockService.getAlertes().subscribe(data => this.alertes = data);
+    this.stockService.getAlertes().subscribe({
+      next: (data) => {
+        this.alertes = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur alertes', err)
+    });
   }
 
   filtrer(): void {
@@ -73,6 +96,7 @@ export class StockComponent implements OnInit {
       s.produit?.nom.toLowerCase().includes(this.recherche.toLowerCase()) ||
       s.entrepot?.nom.toLowerCase().includes(this.recherche.toLowerCase())
     );
+    this.cdr.detectChanges();
   }
 
   ouvrirAjout(): void {
@@ -98,36 +122,42 @@ export class StockComponent implements OnInit {
   }
 
   sauvegarder(): void {
-    if (this.modeEdition && this.stockForm.idStock) {
-      this.stockService.update(this.stockForm.idStock, this.stockForm).subscribe({
-        next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerStocks();
-          this.chargerAlertes();
-          this.afficherFormulaire = false;
-        },
-        error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
-      });
-    } else {
-      this.stockService.add(this.stockForm).subscribe({
-        next: (msg) => {
-          this.afficherMessage(msg, 'success');
-          this.chargerStocks();
-          this.chargerAlertes();
-          this.afficherFormulaire = false;
-        },
-        error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
-      });
-    }
-  }
+  // ✅ Convertir les IDs string → number
+  const stockAEnvoyer = {
+    ...this.stockForm,
+    produit: { idProduit: Number(this.stockForm.produit.idProduit) },
+    entrepot: { idEntrepot: Number(this.stockForm.entrepot.idEntrepot) }
+  };
 
+  if (this.modeEdition && this.stockForm.idStock) {
+    this.stockService.update(this.stockForm.idStock, stockAEnvoyer).subscribe({
+      next: (msg) => {
+        this.afficherFormulaire = false;
+        this.chargerStocks();
+        this.chargerAlertes();
+        this.afficherMessage(msg, 'success');
+      },
+      error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
+    });
+  } else {
+    this.stockService.add(stockAEnvoyer).subscribe({
+      next: (msg) => {
+        this.afficherFormulaire = false;
+        this.chargerStocks();
+        this.chargerAlertes();
+        this.afficherMessage(msg, 'success');
+      },
+      error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
+    });
+  }
+}
   supprimer(id: number): void {
     if (confirm('Confirmer la suppression ?')) {
       this.stockService.delete(id).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
           this.chargerStocks();
           this.chargerAlertes();
+          this.afficherMessage(msg, 'success');
         },
         error: () => this.afficherMessage('Erreur suppression', 'danger')
       });
@@ -141,6 +171,10 @@ export class StockComponent implements OnInit {
   afficherMessage(msg: string, type: string): void {
     this.message = msg;
     this.messageType = type;
-    setTimeout(() => this.message = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.message = '';
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

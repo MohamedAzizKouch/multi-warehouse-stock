@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MouvementService } from '../../services/mouvement.service';
@@ -37,19 +37,34 @@ export class MouvementComponent implements OnInit {
   constructor(
     private mouvementService: MouvementService,
     private produitService: ProduitService,
-    private entrepotService: EntrepotService
+    private entrepotService: EntrepotService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.chargerMouvements();
-    this.produitService.getAll().subscribe(data => this.produits = data);
-    this.entrepotService.getAll().subscribe(data => this.entrepots = data);
+    this.produitService.getAll().subscribe({
+      next: (data) => {
+        this.produits = data;
+        this.cdr.detectChanges();
+      }
+    });
+    this.entrepotService.getAll().subscribe({
+      next: (data) => {
+        this.entrepots = data;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   chargerMouvements(): void {
-    this.mouvementService.getAll().subscribe(data => {
-      this.mouvements = data.reverse();
-      this.mouvementsFiltres = this.mouvements;
+    this.mouvementService.getAll().subscribe({
+      next: (data) => {
+        this.mouvements = [...data].reverse();
+        this.mouvementsFiltres = [...this.mouvements];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement mouvements', err)
     });
   }
 
@@ -61,6 +76,7 @@ export class MouvementComponent implements OnInit {
       const matchType = this.filtreType ? m.type === this.filtreType : true;
       return matchRecherche && matchType;
     });
+    this.cdr.detectChanges();
   }
 
   ouvrirFormulaire(type: 'ENTREE' | 'SORTIE'): void {
@@ -74,26 +90,34 @@ export class MouvementComponent implements OnInit {
   }
 
   sauvegarder(): void {
-    const operation = this.typeMouvement === 'ENTREE'
-      ? this.mouvementService.entree(this.mouvementForm)
-      : this.mouvementService.sortie(this.mouvementForm);
+  // ✅ Convertir les IDs string → number
+  const mouvementAEnvoyer = {
+    ...this.mouvementForm,
+    type: this.typeMouvement,
+    produit: { idProduit: Number(this.mouvementForm.produit.idProduit) },
+    entrepot: { idEntrepot: Number(this.mouvementForm.entrepot.idEntrepot) }
+  };
 
-    operation.subscribe({
-      next: (msg) => {
-        this.afficherMessage(msg, 'success');
-        this.chargerMouvements();
-        this.afficherFormulaire = false;
-      },
-      error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
-    });
-  }
+  const operation = this.typeMouvement === 'ENTREE'
+    ? this.mouvementService.entree(mouvementAEnvoyer)
+    : this.mouvementService.sortie(mouvementAEnvoyer);
+
+  operation.subscribe({
+    next: (msg) => {
+      this.afficherFormulaire = false;
+      this.chargerMouvements();
+      this.afficherMessage(msg, 'success');
+    },
+    error: (err) => this.afficherMessage(err.error || 'Erreur', 'danger')
+  });
+}
 
   supprimer(id: number): void {
     if (confirm('Confirmer la suppression ?')) {
       this.mouvementService.delete(id).subscribe({
         next: (msg) => {
-          this.afficherMessage(msg, 'success');
           this.chargerMouvements();
+          this.afficherMessage(msg, 'success');
         },
         error: () => this.afficherMessage('Erreur suppression', 'danger')
       });
@@ -103,6 +127,10 @@ export class MouvementComponent implements OnInit {
   afficherMessage(msg: string, type: string): void {
     this.message = msg;
     this.messageType = type;
-    setTimeout(() => this.message = '', 4000);
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.message = '';
+      this.cdr.detectChanges();
+    }, 4000);
   }
 }

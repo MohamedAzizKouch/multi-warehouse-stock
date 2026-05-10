@@ -18,10 +18,10 @@ public class Stock {
     private Integer idStock;
 
     @Min(value = 0, message = "La quantité ne peut pas être négative")
-    private int quantite;
+    private Integer quantite;
 
     @Min(value = 0, message = "Le seuil d'alerte ne peut pas être négatif")
-    private int seuilAlerte;
+    private Integer seuilAlerte;
 
     @NotNull(message = "Le produit est obligatoire")
     @ManyToOne

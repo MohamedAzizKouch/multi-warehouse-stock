@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MouvementStock } from '../models/mouvement.model';
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class MouvementService {
 
-  private url = 'http://localhost:9090/mouvement';
+  private url = `${environment.apiUrl}/mouvement`;
 
   constructor(private http: HttpClient) {}
 

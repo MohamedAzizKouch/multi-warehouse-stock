@@ -6,10 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import tn.itbs.projet.entities.MouvementStock;
 import tn.itbs.projet.entities.MouvementStock.TypeMouvement;
 import tn.itbs.projet.services.MouvementStockService;
@@ -22,13 +20,13 @@ public class MouvementStockController {
     private MouvementStockService mouvementService;
 
     @PostMapping("/entree")
-    public ResponseEntity<String> entreeStock(@Valid @RequestBody MouvementStock mouvement, BindingResult result) {
-        return mouvementService.entreeStock(mouvement, result);
+    public ResponseEntity<String> entreeStock(@RequestBody MouvementStock mouvement) {
+        return mouvementService.entreeStock(mouvement);
     }
 
     @PostMapping("/sortie")
-    public ResponseEntity<String> sortieStock(@Valid @RequestBody MouvementStock mouvement, BindingResult result) {
-        return mouvementService.sortieStock(mouvement, result);
+    public ResponseEntity<String> sortieStock(@RequestBody MouvementStock mouvement) {
+        return mouvementService.sortieStock(mouvement);
     }
 
     @GetMapping("/all")
