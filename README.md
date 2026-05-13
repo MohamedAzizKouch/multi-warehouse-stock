@@ -16,6 +16,7 @@ built with **Spring Boot** (REST API) and **Angular** (Frontend UI).
 - [Default Credentials](#default-credentials)
 - [API Documentation](#api-documentation)
 - [Security & Roles](#security--roles)
+- [Cloud Deployment](#cloud-deployment)
 
 ---
 
@@ -54,6 +55,10 @@ low-stock alerts, and role-based access control for different user types.
 |---|---|
 | Docker | Containerization |
 | Docker Compose | Multi-container orchestration |
+| Google Cloud Platform | Cloud Deployment |
+| Google Compute Engine | VM Hosting |
+| Google Cloud SQL | Managed MySQL Database |
+| Google Artifact Registry | Docker Image Registry |
 
 ---
 
@@ -67,10 +72,13 @@ low-stock alerts, and role-based access control for different user types.
 - 📊 **Dashboard** — Overview of total products, warehouses, stocks and movements
 - 🔐 **Authentication** — HTTP Basic Auth with role-based access control
 - 📝 **API Documentation** — Interactive Swagger UI
+- ☁️ **Cloud Deployment** — Hosted on Google Cloud Platform
 
 ---
 
 ## 📁 Project Structure
+
+```
 multi-warehouse-stock/
 ├── MiniProjet/                    # Spring Boot Backend
 │   ├── src/
@@ -91,8 +99,10 @@ multi-warehouse-stock/
 │       └── interceptors/          # HTTP Interceptors
 ├── Dockerfile                     # Angular Dockerfile
 ├── nginx.conf                     # Nginx Configuration
-├── docker-compose.yml             # Docker Compose
+├── docker-compose.yml             # Docker Compose (local)
+├── docker-compose.prod.yml        # Docker Compose (production/GCP)
 └── README.md
+```
 
 ---
 
@@ -122,7 +132,7 @@ Wait for all 3 containers to start:
 - ✅ `spring_backend` — REST API
 - ✅ `angular_frontend` — Web UI
 
-### Access the Application
+### Access the Application (Local)
 
 | Service | URL |
 |---|---|
@@ -158,6 +168,56 @@ ng serve
 
 ---
 
+## ☁️ Cloud Deployment
+
+The application is deployed on **Google Cloud Platform** using the following services:
+
+| GCP Service | Usage |
+|---|---|
+| Compute Engine (e2-small) | Hosts Docker containers (backend + frontend) |
+| Cloud SQL (MySQL 5.7) | Managed database |
+| Artifact Registry | Stores Docker images |
+
+### Live Access
+
+| Service | URL |
+|---|---|
+| 🌐 Frontend (Angular) | http://35.195.52.114 |
+| 📝 Swagger UI | http://35.195.52.114:9090/swagger-ui/index.html |
+
+### GCP Architecture
+
+```
+User
+ │
+ ▼
+Compute Engine VM (e2-small — europe-west1)
+ ├── angular_frontend (Nginx :80)
+ │       │ proxy_pass
+ │       ▼
+ └── spring_backend (:9090)
+         │
+         ▼
+  Cloud SQL (MySQL 5.7 — europe-west1)
+```
+
+### Re-deploy Steps
+
+```bash
+# 1. Build and push new images
+gcloud builds submit --tag europe-west1-docker.pkg.dev/multi-warehouse-stock/warehouse-repo/backend:latest ./MiniProjet
+gcloud builds submit --tag europe-west1-docker.pkg.dev/multi-warehouse-stock/warehouse-repo/frontend:latest .
+
+# 2. SSH into the VM
+gcloud compute ssh warehouse-vm --zone=europe-west1-b
+
+# 3. Pull and restart containers
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+---
+
 ## 🔑 Default Credentials
 
 | Email | Password | Role |
@@ -169,7 +229,8 @@ ng serve
 ## 📝 API Documentation
 
 Full interactive API documentation available at:
-http://localhost:9090/swagger-ui/index.html
+- **Local:** http://localhost:9090/swagger-ui/index.html
+- **Cloud:** http://35.195.52.114:9090/swagger-ui/index.html
 
 ### Main Endpoints
 
