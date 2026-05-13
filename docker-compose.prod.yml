@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+
+  backend:
+    image: gcr.io/multi-warehouse-stock/backend:latest
+    container_name: spring_backend
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://CLOUD_SQL_IP:3306/gestion_stock?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: APP_PASSWORD
+    restart: always
+    networks:
+      - stock_network
+
+  frontend:
+    image: gcr.io/multi-warehouse-stock/frontend:latest
+    container_name: angular_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - stock_network
+
+networks:
+  stock_network:
+    driver: bridge
